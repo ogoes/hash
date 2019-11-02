@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+
+message Player {
+	
+	uint64 id = 1;
+	string username = 2;
+
+}
+
+message Position {
+	int32 line = 1;
+	int32 column = 2;
+}
+
+message Hit {
+	Position position = 1;
+	Player player = 2;
+}
+
+message Response {
+	int32 status_code = 1;
+	string message = 2;
+}
+
+
+// request exit
+message Exit {
+	Player player = 1;
+}
+
+message ExitAlert { // send to other player
+	string message = 1;
+	Player player = 2;
+}
+

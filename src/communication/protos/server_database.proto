@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+message Player {
+	
+	uint64 id = 1;
+	string username = 2;
+	uint32 wins = 3;
+	uint32 tieds = 4;
+	uint32 lost = 5;
+
+}
+
+message Game {
+	
+	uint64 id = 1;
+	Player player1 = 2;
+	Player player2 = 3;
+
+	enum Result {
+		TIED = 0;
+		HAS_WINNER = 1;
+	}
+
+	Result result = 4;
+
+	enum Winner {
+		PLAYER1 = 0;
+		PLAYER2 = 1;
+	}
+
+	Winner winner = 5;
+
+}
+
+
+enum Operation {
+
+	CREATE = 0;
+	RETRIEVE = 1;
+	UPDATE = 2;
+	DELETE = 3;
+
+}
+
+
+message Response {
+
+	int32 status_code = 1;
+	string message = 2;
+}
+
+message PlayerOperation {
+
+	Operation operation = 1;
+	Player player_data = 2;
+}
+
+message PlayerResponse {
+	
+	Response status = 1;
+	repeated Player player = 2;
+}
+
+
+message GameOperation {
+
+	Operation operation = 1;
+	Player player_data = 2;
+}
+
+message GameResponse {
+
+	Response status = 1;
+	repeated Game game = 2;
+}
+
+
+
+

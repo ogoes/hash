@@ -6,13 +6,13 @@ Um jogo multiusuário onde dois usuários podem se desafiar em uma partida de Jo
 
 ###### Tecnologias Usadas:
 
-   - [C++](http://www.cplusplus.org/)
+   - [C++](http://www.cplusplus.org/) c++17
 
-   - [wxWidgets](https://www.wxwidgets.org/)
+   - [wxWidgets](https://www.wxwidgets.org/) 3.0.4-2
 
-   - [Protocol Buffers](https://developers.google.com/protocol-buffers)
+   - [Protocol Buffers](https://developers.google.com/protocol-buffers) 3.10.0
 
-   - [SQLite](https://www.sqlite.org/index.html)
+   - [SQLite](https://www.sqlite.org/index.html) 3.30.1
 
 
 ###### Arquitetura do sistema

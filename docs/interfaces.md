@@ -3,20 +3,5 @@
   Toda a comunicação é feita por troca de mensagens em bytes, com sockets TCP
 
 
-## Modelos (Protocol Buffers)
-
-  ```protobuf
-    message User {
-
-    }
-  ```
-
-
-## Interfaces
-
-  - ### Login (request)
-  - ### Login (response)
-  - ### 
-  - ### 
-  - ### 
+  A comunicação será feita com a definição que pode ser encontrada em [Modelos](docs/models.md).
 

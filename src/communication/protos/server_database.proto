@@ -1,12 +1,15 @@
 syntax = "proto3";
 
+package server_db;
+
 message Player {
 	
 	uint64 id = 1;
 	string username = 2;
-	uint32 wins = 3;
-	uint32 tieds = 4;
-	uint32 lost = 5;
+	string password = 3;
+	uint32 wins = 4;
+	uint32 tieds = 5;
+	uint32 lost = 6;
 
 }
 
@@ -33,14 +36,31 @@ message Game {
 }
 
 
-enum Operation {
+message Request {
 
-	CREATE = 0;
-	RETRIEVE = 1;
-	UPDATE = 2;
-	DELETE = 3;
+	enum Entity {
+		PLAYER = 0;
+		GAME = 1;
+	}
 
+	Entity entity = 1;
+
+	enum Operation {
+
+		CREATE = 0;
+		RETRIEVE = 1;
+		UPDATE = 2;
+		DELETE = 3;
+
+	}
+
+	Operation operation = 2;
+
+
+	Player player = 3;
+	Game game = 4;
 }
+
 
 
 message Response {
@@ -49,23 +69,10 @@ message Response {
 	string message = 2;
 }
 
-message PlayerOperation {
-
-	Operation operation = 1;
-	Player player_data = 2;
-}
-
 message PlayerResponse {
 	
 	Response status = 1;
 	repeated Player player = 2;
-}
-
-
-message GameOperation {
-
-	Operation operation = 1;
-	Player player_data = 2;
 }
 
 message GameResponse {

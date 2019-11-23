@@ -7,3 +7,7 @@ MODELS = ./player_model.cpp ./game_model.cpp
 all:
 	$(COMP) $(FLAGS) $(LIBS) $(MODELS) db_controller.cpp -o db_daemon
 
+
+log:
+	$(COMP) -D LOG $(FLAGS) $(LIBS) $(MODELS) db_controller.cpp -o db_daemon
+

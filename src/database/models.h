@@ -1,7 +1,9 @@
 
+#include <future>
 #include <iostream>
 #include <string>
-#include <vector>
+
+#include "database/database.h"
 
 namespace models {
 typedef std::vector< std::string > db_data_t;
@@ -67,8 +69,8 @@ private:
   uint        lost;
 };
 
-typedef enum { TIED = 0, HAS_WINNER } Result;
-typedef enum { PLAYER1 = 0, PLAYER2 } Winner;
+typedef enum { TIED = 1, HAS_WINNER } Result;
+typedef enum { PLAYER1 = 1, PLAYER2 } Winner;
 
 static std::string GAME_CREATION =
     "PRAGMA foreign_keys = ON;"
@@ -90,7 +92,7 @@ public:
   ~Game ();
 
   // from database
-  Game* from_db ( db_data_t );
+  static Game* from_db ( db_data_t );
 
   // getters
   uint    get_id ();
@@ -99,6 +101,14 @@ public:
 
   Result  get_result ();
   Player* get_winner ();
+
+  std::string insert_into ();  //
+
+  std::string query_builder ( const char* );  //
+
+  std::string update ();  //
+
+  std::string delete_from ();  //
 
   // setters
   Game* set_id ( uint );

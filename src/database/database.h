@@ -8,8 +8,17 @@
 #include <sqlite3.h>
 
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <vector>
+
+
+#if LOG
+  #define logging(x) std::cout << x << std::endl;
+#else
+  #define logging(x)
+#endif
+
 
 class Database {
 public:
@@ -25,6 +34,8 @@ private:
 private:
   // singleton
   static Database* instance;
+
+  std::mutex mutex;
 
   sqlite3* db = NULL;
   bool     opened;

@@ -23,15 +23,18 @@ Database* Database::instance = nullptr;
  * @param  db_name [description] recebe o nome do arquivo do banco de dados
  * @return         [description] returna o status da operação (true, false)
  */
-bool Database::open ( const char* db_name ) {
-  if ( instance == nullptr ) instance = new Database ();
-  if ( instance->opened ) return instance->opened;
+bool Database::open(const char* db_name) {
+  if (instance == nullptr) instance = new Database();
 
-  if ( sqlite3_open ( db_name, &( instance->db ) ) ) {
+  instance->mutex.lock();
+
+  if (sqlite3_open(db_name, &(instance->db))) {
     delete instance;
     instance = nullptr;
     throw "Erro ao abrir o banco de dados especificado";
   }
+
+  instance->mutex.unlock();
 
   instance->opened = !instance->opened;
 
@@ -43,16 +46,18 @@ bool Database::open ( const char* db_name ) {
  * @param  sql [description] string que será executada no banco
  * @return     [description] returna o status da operação (true, false)
  */
-bool Database::exec ( const char* sql ) {
-  if ( !instance ) instance = new Database ();
-  if ( !instance->opened ) return !instance->opened;
+bool Database::exec(const char* sql) {
+  if (!instance) Database::open("data.db");
 
   char* errMsg = 0;
+  instance->mutex.lock();
 
-  if ( sqlite3_exec ( instance->db, sql, 0, 0, &errMsg ) != SQLITE_OK ) {
+  if (sqlite3_exec(instance->db, sql, 0, 0, &errMsg) != SQLITE_OK) {
     std::cout << errMsg << std::endl;
     return false;
   }
+  instance->mutex.unlock();
+
   return true;
 }
 
@@ -63,28 +68,30 @@ bool Database::exec ( const char* sql ) {
  * da resposta para cada linha, as suas determinadas colunas, e para cada coluna
  * seu valor
  */
-std::vector< std::vector< std::string > > Database::query ( const char* sql ) {
-  if ( !instance ) instance = new Database ();
+std::vector<std::vector<std::string> > Database::query(const char* sql) {
+  if (!instance) instance = new Database();
 
-  std::vector< std::vector< std::string > > response;
-  if ( !instance->opened ) return response;
+  std::vector<std::vector<std::string> > response;
 
   sqlite3_stmt* statement;
+  instance->mutex.lock();
 
-  if ( sqlite3_prepare_v2 ( instance->db, sql, -1, &statement, 0 ) == 0 ) {
-    int colNumber = sqlite3_column_count ( statement );
+  if (sqlite3_prepare_v2(instance->db, sql, -1, &statement, 0) == 0) {
+    int colNumber = sqlite3_column_count(statement);
     int retval;
-    while ( ( retval = sqlite3_step ( statement ) ) != SQLITE_DONE ) {
-      if ( retval == SQLITE_ROW ) {
-        std::vector< std::string > row;
-        for ( int col = 0; col < colNumber; ++col ) {
-          row.push_back ( std::string (
-              ( const char* )sqlite3_column_text ( statement, col ) ) );
+    while ((retval = sqlite3_step(statement)) != SQLITE_DONE) {
+      if (retval == SQLITE_ROW) {
+        std::vector<std::string> row;
+        for (int col = 0; col < colNumber; ++col) {
+          row.push_back(
+              std::string((const char*)sqlite3_column_text(statement, col)));
         }
-        response.push_back ( row );
+        response.push_back(row);
       }
     }
   }
+
+  instance->mutex.unlock();
 
   return response;
 }
@@ -92,9 +99,11 @@ std::vector< std::vector< std::string > > Database::query ( const char* sql ) {
 /**
  * [Database::close description] fecha a conexão com banco de dados
  */
-void Database::close () {
-  if ( instance ) sqlite3_close ( instance->db );
+void Database::close() {
+  instance->mutex.lock();
+  if (instance) sqlite3_close(instance->db);
+  instance->mutex.unlock();
 }
 
-Database::Database () {}
-Database::~Database () {}
+Database::Database() {}
+Database::~Database() {}

@@ -1,121 +1,143 @@
 
 syntax = "proto3";
 
+package server_client;
 
 message Player {
-	
-	uint64 id = 1;
-	string username = 2;
-	uint32 wins = 3;
-	uint32 tieds = 4;
-	uint32 lost = 5;
-
+  uint64 id = 1;
+  string username = 2;
+  string password = 3;
+  uint32 wins = 4;
+  uint32 tieds = 5;
+  uint32 lost = 6;
 }
-
-
 
 // Operations
-// 
+//
 message Operation {
+  enum Request {
+    RANKING = 0;  // show ranking
+    PLAY = 1;     // play a game
+    ONLINE = 2;   // online users
+    VIEW = 3;     // view yourself information
+    CHANGE = 4;   // request updates in your acount
+		EXIT = 5;
+  }
 
-	enum Request {
-		RANKING = 0; // show ranking
-		PLAY = 1; // play a game
-		ONLINE = 2; // online users
-		VIEW = 3; // view yourself information
-		CHANGE = 4; // request updates in your acount
-	}
-
-	Request operation = 1;
-
+  Request operation = 1;
 }
 
-
-message ResponseStatus {
-	int32 status_code = 1;
-	string message = 2;
+message Response {
+  int32 status_code = 1;
+  string message = 2;
 }
-
 
 // Login and Signup has the same request body
-// 
+//
 message LogInSignUp {
-	string username = 1;
-	string password = 2;
+  string username = 1;
+  string password = 2;
 
-	enum Type {
-		SIGNUP = 0;
-		LOGIN = 1;
-	}
+  enum Type {
+    SIGNUP = 0;
+    LOGIN = 1;
+  }
 
-	Type request_type = 3;
+  Type request_type = 3;
 }
 
 // Login and Signup has the same reponse
-// 
+//
 message LogInSignUpResponse {
-	ResponseStatus status = 1;
-	Player player = 2;
+  Response status = 1;
+  Player player = 2;
+  bool already_logged = 3;
 }
 
-
 // Ranking
-// 
+//
 message Ranking {
-	ResponseStatus status = 1;
-	repeated Player players = 2;
+  Response status = 1;
+  repeated Player players = 2;
 }
 
 // Play
-// 
+//
 message Play {
+  enum Type {
+    WAIT = 0;
+    CHALLENGE = 1;
+  }
 
-	enum Type {
-		WAIT = 0;
-		CHALLANGE = 1;
+  Type request_type = 1;
+
+  Player challended_player = 2;
+}
+
+// Result
+
+message GameResult {
+	enum Result {
+		HAS_WINNER = 0;
+		TIED = 1;
 	}
 
-	Type request_type = 1;
+	Result result = 1;
 
-
-	Player challanded_player = 2;
-}
-
-// Challange
-message ChallangeRequest {
-	Player challander_player = 1;
-}
-
-message ChallangeResponse {
-	enum Answer {
-		ACCEPT = 0;
-		DENY = 1;
+	enum Winner {
+		PLAYER1 = 0;
+		PLAYER2 = 1;
 	}
 
-	Answer answer = 1;
+	Winner winner = 2;
 }
 
 
+message Keep { // send to player via backup socket
+  enum Type {
+    ACK = 0;
+    CHALLENGE = 1;
+  }
 
+  Type type = 1;
+}
 
+// Challenge
+message ChallengeRequest {
+  Player challender_player = 1;
+}
+
+message ChallengeResponse {
+  enum Answer {
+    ACCEPT = 0;
+    DENY = 1;
+  }
+
+  Answer answer = 1;
+}
+
+// View Response
+
+message View {
+	Response status = 1;
+  Player player = 2;
+}
 
 // Online Users
-// 
+//
 message OnlinePlayers {
-	ResponseStatus status = 1;
-	repeated Player pleyers = 2;
+  Response status = 1;
+  repeated Player players = 2;
 }
 
-
-
 // Acount Changes
-// 
+//
 message Change {
-	string username = 1;
-	string password = 2;
+  string username = 1;
+  string password = 2;
 }
 
 message ChangesResponse {
-	ResponseStatus status = 1;
-
+  Response status = 1;
 }
+

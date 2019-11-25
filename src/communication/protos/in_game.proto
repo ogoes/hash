@@ -1,36 +1,64 @@
 syntax = "proto3";
 
+package in_game;
 
 message Player {
-	
-	uint64 id = 1;
-	string username = 2;
-
+  uint64 id = 1;
+  string username = 2;
 }
 
 message Position {
-	int32 line = 1;
-	int32 column = 2;
+  int32 line = 1;
+  int32 column = 2;
+
+  enum ValueType {
+    NONE = 0;
+    X = 1;
+    O = 2;
+  }
+
+  ValueType value = 3;
 }
 
 message Hit {
-	Position position = 1;
-	Player player = 2;
+  Position position = 1;
+  Player player = 2;
 }
 
 message Response {
-	int32 status_code = 1;
-	string message = 2;
+  int32 status_code = 1;
+  string message = 2;
 }
 
+message State {
+  repeated Position elements = 1;  // sempre 9
+	bool turn = 2;
+  bool finished = 3;
+}
+
+message Result {
+  enum Tieds {
+    WINNER = 0;
+    TIEDS = 1;
+  }
+
+  Tieds result = 1;
+
+  enum Winner {
+    PLAYER1 = 0;
+    PLAYER2 = 1;
+  }
+
+  Winner winner = 2;
+  string username = 3;
+}
 
 // request exit
 message Exit {
-	Player player = 1;
+  Player player = 1;
 }
 
-message ExitAlert { // send to other player
-	string message = 1;
-	Player player = 2;
+message ExitAlert {  // send to other player
+  string message = 1;
+  Player player = 2;
 }
-

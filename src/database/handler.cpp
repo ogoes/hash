@@ -70,17 +70,10 @@ server_db::PlayerResponse PlayerHandler::Retrieve(
   models::Player* player_model = new models::Player();
 
   std::string username = player.username();
-  logging("username: " << username);
 
   if (username.size() > 0) {
+  logging("username: " << username);
     player_model->set_username(username);
-  } else {
-    status->set_status_code(400);
-    status->set_message("[username] não especificado.");
-    // bad request
-    //
-    logging("Não foi passado o username");
-    return response;
   }
 
   uint id = player.id();
@@ -120,7 +113,7 @@ server_db::PlayerResponse PlayerHandler::Retrieve(
   logging("Retornando");
 
   status->set_status_code(200);
-  status->set_message("Player registrado com sucesso.");
+  status->set_message("Player encontrado com sucesso.");
 
   return response;
 }

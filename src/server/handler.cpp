@@ -14,7 +14,7 @@ void Handler::Handle(std::string signInResponseAsString, SockAttr socketAttr) {
   server_client::LogInSignUpResponse signInResponse;
   signInResponse.ParseFromString(signInResponseAsString);
 
-  if (signInResponse.status().status_code() != 100) return;
+  // if (signInResponse.status().status_code() != 100) return;
 
   server_client::Player pbPlayer = signInResponse.player();
 
@@ -25,33 +25,41 @@ void Handler::Handle(std::string signInResponseAsString, SockAttr socketAttr) {
       if ((*it) == player) {
         (*it).setBackupSocketFd(socketAttr.sockFd);
 
-        (*it).receiveBackupMessage(); // ACK
+        (*it).receiveBackupMessage();  // ACK
 
         server_client::Response res;
         res.set_message("Todo certo!");
         res.set_status_code(200);
 
         (*it).sendBackupMessage((char*)res.SerializeAsString().c_str());
-
+        logging("PLAYER LOGGADO");
         return;
       }
     }
   }
 
-  player.setSocketFd(socketAttr.sockFd);
+  for (auto it = players.begin(); it != players.end(); ++it) {
+    std::cout << (*it).getPlayerInfo().username() << std::endl;
+  }
 
+  logging("PLAYER");
+
+  player.setSocketFd(socketAttr.sockFd);
   std::string recvMessage = player.receiveMessage();
+
+  logging(recvMessage);
 
   server_client::Operation operation;
   if (recvMessage.size() > 0) {
     operation.ParseFromString(recvMessage);
-    players.push_back(player);
+    // players.push_back(player);
   } else {
     return;
   }
 
   while (operation.operation() != server_client::Operation::EXIT) {
     std::string response;
+    std::cout << operation.operation() << std::endl;
     switch (operation.operation()) {
       case server_client::Operation::RANKING:
         response = ranking();
@@ -101,6 +109,7 @@ std::string Handler::signUp(std::string username, std::string password) {
   server_db::Player* player = request.mutable_player();
   // player->set_id(0);
   player->set_username(username);
+  player->set_password(password);
 
   int sock = DatabaseCommunication::sendRequest(request);
 
@@ -123,7 +132,7 @@ std::string Handler::signUp(std::string username, std::string password) {
       server_client::Response* status = logInResponse.mutable_status();
 
       status_code = response.status().status_code();
-      if (status_code == 201) { 
+      if (status_code == 201) {
         status->set_status_code(100);
         status->set_message("Player ativo!");
 
@@ -133,6 +142,8 @@ std::string Handler::signUp(std::string username, std::string password) {
         player->set_wins(0);
         player->set_tieds(0);
         player->set_lost(0);
+
+        players.push_back(Player(*player));
 
       } else {
         status->set_status_code(status_code);
@@ -174,7 +185,11 @@ std::string Handler::logIn(std::string username, std::string password) {
     status->set_message("Player ativo!");
 
     server_client::Player* playerResponse = logInResponse.mutable_player();
-    playerResponse->CopyFrom(response.player().at(0));
+    playerResponse->set_username(response.player().at(0).username());
+    playerResponse->set_password(response.player().at(0).password());
+    playerResponse->set_tieds(response.player().at(0).tieds());
+    playerResponse->set_wins(response.player().at(0).wins());
+    playerResponse->set_lost(response.player().at(0).lost());
 
     Player isLogged(*playerResponse);
 
@@ -185,6 +200,8 @@ std::string Handler::logIn(std::string username, std::string password) {
         logInResponse.set_already_logged(true);
       }
     }
+
+    if (!logInResponse.already_logged()) players.push_back(isLogged);
 
     return logInResponse.SerializeAsString();
   }
@@ -221,7 +238,6 @@ std::string Handler::ranking() {
     for (auto it = db_players.begin(); it != db_players.end(); ++it) {
       server_client::Player* responsePlayer = rankingResponse.add_players();
       responsePlayer->CopyFrom((*it));
-      
     }
   }
 
@@ -284,6 +300,12 @@ std::string Handler::view(Player& player) {
   request.set_operation(server_db::Request::RETRIEVE);
 
   server_db::Player* requestPlayer = request.mutable_player();
+
+  requestPlayer->set_username(player.getPlayerInfo().username());
+  requestPlayer->set_password(player.getPlayerInfo().password());
+  requestPlayer->set_tieds(player.getPlayerInfo().tieds());
+  requestPlayer->set_wins(player.getPlayerInfo().wins());
+  requestPlayer->set_lost(player.getPlayerInfo().lost());
   requestPlayer->CopyFrom(player.getPlayerInfo());
 
   int sock = DatabaseCommunication::sendRequest(request);
@@ -315,6 +337,12 @@ std::string Handler::change(Player& player) {
   request.set_operation(server_db::Request::RETRIEVE);
 
   server_db::Player* requestPlayer = request.mutable_player();
+
+  requestPlayer->set_username(player.getPlayerInfo().username());
+  requestPlayer->set_password(player.getPlayerInfo().password());
+  requestPlayer->set_tieds(player.getPlayerInfo().tieds());
+  requestPlayer->set_wins(player.getPlayerInfo().wins());
+  requestPlayer->set_lost(player.getPlayerInfo().lost());
   requestPlayer->CopyFrom(player.getPlayerInfo());
 
   int sock = DatabaseCommunication::sendRequest(request);
@@ -330,7 +358,12 @@ std::string Handler::change(Player& player) {
     auto db_players = response.player();
 
     server_client::Player* pl = playerResponse.mutable_player();
-    pl->CopyFrom(db_players.at(0));
+    pl->set_username(db_players.at(0).username());
+    pl->set_password(db_players.at(0).password());
+    pl->set_tieds(db_players.at(0).tieds());
+    pl->set_wins(db_players.at(0).wins());
+    pl->set_lost(db_players.at(0).lost());
+
     player.updateInfo(*pl);
   }
 

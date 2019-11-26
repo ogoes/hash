@@ -9,12 +9,11 @@
 // protocol buffers
 #include "communication/server_database.pb.h"
 
-
 typedef struct sockaddr_in SocketInfo;
 
 namespace DatabaseCommunication {
 
-static char DATABASE_ADDR [16];
+static char *DATABASE_ADDR;
 static long int DATABASE_PORT = 0;
 
 server_db::PlayerResponse receiveFromPlayerRequest(int);

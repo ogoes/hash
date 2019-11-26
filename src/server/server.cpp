@@ -44,10 +44,11 @@ void SignIn(SockAttr connection) {
     const char* sender_buffer = response.c_str();
     long int sender_buffer_size = strlen(sender_buffer);
 
-    logging("Enviando Responta");
+    logging("Enviando Resposta");
     send(connection.sockFd, sender_buffer, sender_buffer_size, 0);
   }
 
+  logging("Handle");
   Handler::Handle(response, connection);
 }
 

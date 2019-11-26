@@ -36,7 +36,7 @@ GameResponse DatabaseCommunication::receiveFromGameRequest(int socketfd) {
 int DatabaseCommunication::sendRequest(Request request) {
   if (!DATABASE_ADDR) {
     logging("Endereço padrão do banco de dados: 127.0.0.1");
-    strcpy(DATABASE_ADDR, "127.0.0.1");
+    DATABASE_ADDR = (char *)"127.0.0.1";
   }
 
   if (!DATABASE_PORT) {
